@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>통합관리시스템 관리자 가이드</title>
+<link rel="stylesheet" href="style.css"></head>
+<body><div id="stage"></div>
+<script src="engine.js"></script>
+<script>
+/* 관리자 가이드 v2: 숫자(정량)로 누구를 챙길지 찾고, 기록(정성)으로 왜·어떻게를 남긴다. 기관명·수치는 모두 가상 */
+var V = window.V, set = V.set, show = V.show, count = V.count, seg = V.seg, lerp = V.lerp, eo = V.eo, fade = V.fade, q = V.q, qa = V.qa, el = V.el;
+function tbl(h, rows, cls) { return '<table class="t ' + (cls || '') + '"><tr>' + h.map(function (x) { return '<th' + (x[0] === '>' ? ' class="r">' + x.slice(1) : '>' + x) + '</th>'; }).join('') + '</tr>' + rows.map(function (r, i) { return '<tr class="rw" data-i="' + i + '">' + r.map(function (c, j) { return '<td' + (h[j][0] === '>' ? ' class="r"' : '') + '>' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>'; }
+var FLOW = ['공모', '신청', '심사', '사업관리', '사후관리'];
+
+V.add(0, 7, { label: '처음', custom: V.intro('통합관리시스템 관리자 가이드', '숫자로 찾고,', '<b>기록으로 이어 갑니다.</b>', FLOW) });
+
+/* 0. 관리자 로그인 */
+V.chapter(7, 22, { kind: 'admin', nav: '', cat: '시작', no: '01 · 시작', title: '관리자 로그인', path: '관리자 사이트 > 관리자 로그인',
+  core: '비밀번호 없이, 재단 구글 계정(@hamkke.org) 하나로 들어갑니다.',
+  steps: [[.2, '관리자 사이트 접속', '관리자 사이트 주소로 들어가면 「관리자 로그인」 화면이 나옵니다'], [2.4, '재단 구글 계정으로 로그인', '「재단 구글 계정으로 로그인」을 누릅니다'], [4.4, '@hamkke.org 계정 선택', '구글 계정 선택 화면에서 재단 계정(@hamkke.org)을 고릅니다. 개인 계정은 들어갈 수 없습니다'], [8, '홈 화면', '로그인하면 입력 대기 업무와 일정 임박, 사후관리 미안내가 모인 홈이 열립니다'], [11.4, '내 권한 확인·신청', '시스템 관리 > 권한 신청에서 내 권한을 확인하고, 필요하면 추가 권한을 신청합니다']],
+  html: '<div class="scr" style="display:flex;align-items:center;justify-content:center"><div style="width:440px;text-align:center"><div class="mut" style="font-size:15px;font-weight:700;letter-spacing:.06em;margin-bottom:6px">함께일하는재단 통합관리시스템</div><div style="font-size:30px;font-weight:800;letter-spacing:-.04em;margin-bottom:22px">관리자 로그인</div>' +
+    '<div class="tile" style="padding:28px"><span class="btn" id="gl" style="display:block;font-size:17px;padding:12px">재단 구글 계정으로 로그인</span><div class="mut" style="font-size:13px;margin-top:12px">@hamkke.org 계정으로 로그인해야 합니다.</div></div></div></div>' +
+    '<div class="scr" style="display:flex;align-items:center;justify-content:center"><div style="width:470px;background:#f6f3f0;color:#2a201b;border-radius:14px;padding:26px 28px;box-shadow:0 20px 60px rgba(0,0,0,.5)"><div style="font-size:14px;font-weight:700;color:#7a6d64">구글 계정</div><div style="font-size:24px;font-weight:800;margin:6px 0 4px">계정 선택</div><div style="font-size:14px;color:#7a6d64;margin-bottom:14px">통합관리시스템(으)로 이동</div>' +
+    [['홍', '홍길동 (가상)', 'gildong@hamkke.org', 1], ['개', '개인 계정', 'my.personal@gmail.com', 0]].map(function (a) { return '<div class="ac" data-w="' + a[3] + '" style="display:flex;align-items:center;gap:14px;padding:12px 10px;border-top:1px solid #e3ddd8;border-radius:8px"><span style="width:38px;height:38px;border-radius:50%;background:' + (a[3] ? '#F5A733' : '#b9aea6') + ';display:flex;align-items:center;justify-content:center;font-weight:800;color:#2a201b">' + a[0] + '</span><span style="flex:1;font-size:16px;font-weight:700">' + a[1] + '<div style="font-size:14px;font-weight:500;color:#7a6d64">' + a[2] + '</div></span></div>'; }).join('') + '</div></div>' +
+    '<div class="scr"><div class="h1">홍길동 님 <span class="badge">창업육성팀 · 담당</span></div><div class="grid3" id="hm">' + [['입력 대기 업무', '6건'], ['신청 검토', '2건'], ['변경 검토', '1건'], ['일정 임박(7일 이내)', '3건'], ['사후관리 미안내', '4곳'], ['성과지표 확정 대기', '2건']].map(function (k) { return '<div class="tile kpi"><div class="l">' + k[0] + '</div><div class="n" style="font-size:36px">' + k[1] + '</div></div>'; }).join('') + '</div></div>' +
+    '<div class="scr"><div class="crumb">시스템 관리 > 권한 신청</div><div class="h1">권한 신청</div><div class="grid2"><div class="tile" id="my"><h3>내 권한 요약</h3><div style="font-size:17px;font-weight:600;line-height:2"><div><span class="mut">역할</span> 담당</div><div><span class="mut">담당 사업</span> 2026 지역 상생 공모</div><div><span class="mut">원문 열람</span> 없음</div></div></div><div class="tile" id="rqf"><h3>추가 권한 신청</h3><div class="lab">필요한 권한</div><div class="field" id="rk" style="margin-bottom:10px"></div><div class="lab">사유</div><div class="field" id="rr"></div><div style="text-align:right;margin-top:10px"><span class="btn" id="rb">신청</span></div><div class="mut" style="font-size:13px;margin-top:6px">권한은 총괄이 변경합니다.</div></div></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), gl = q(pc, '#gl'), ac = qa(pc, '.ac'), rb = q(pc, '#rb');
+    var to = V.toast(pc, '✓ 권한 신청이 접수되었습니다 · 총괄 승인 대기');
+    return function (p) {
+      sc(p, [[0, 0], [3.4, 1], [7.8, 2], [11.2, 3]]);
+      cur(p, [[1.2, { x: 560, y: 520 }], [2.2, gl], [5.2, ac[0]], [12.8, rb]], [2.9, 6.9, 13.5]);
+      ac.forEach(function (a) { set(a, 'background', a.dataset.w === '1' && p > 5.6 ? '#efe4d8' : 'transparent'); });
+      fo(p, [[8.2, 11, q(pc, '#hm'), 6]]);
+      V.type(q(pc, '#rk'), '열람 (사후관리 통화용)', p, 11.6, 12.2); V.type(q(pc, '#rr'), '사후관리 대상 기관 근황 통화', p, 12.2, 12.7);
+      to(p, 13.6, 14.8);
+    };
+  } });
+
+/* A1. 공모 올리기 */
+V.chapter(22, 40, { kind: 'admin', nav: '신청', cat: '신청', no: '02 · 신청', title: '공모 올리기', path: '신청 > 사업공모',
+  core: '공고 내용·포스터·모집 기간을 한 화면에 쓰고, 미리보기로 확인한 뒤 게시합니다.',
+  steps: [[.2, '새 공모 작성', '신청 > 사업공모에서 「새 공모 작성」을 누릅니다 (총괄)'], [2.6, '기본정보 입력', '사업 제목, 신청 시작일·마감일, 지원 대상·규모, 모집 정원을 적습니다'], [8.4, '배너·포스터 등록', '목록에 쓰일 배너와 상세 화면 포스터 이미지를 올립니다'], [10.6, '참여자 화면 미리보기', '게시하기 전에 참여자에게 보일 화면을 그대로 확인합니다'], [14.2, '게시하기', '「게시하기」를 누르면 모집중으로 바뀌고 참여자 사이트에 열립니다']],
+  html: '<div class="scr"><div class="crumb">신청 > 사업공모</div><div class="h1">사업공모 <span style="flex:1"></span><span class="btn" id="nw">새 공모 작성</span></div>' +
+    tbl(['사업', '상태', '모집 기간', '>정원', '>신청'], [['<span id="nn" style="color:#F5A733;font-weight:700"></span>', '<span id="ns"></span>', '<span id="nd"></span>', '<span id="nq"></span>', '<span id="nc"></span>'], ['2026 청년 일자리 실험실', '<span class="badge a">모집중</span>', '11.03 ~ 12.17', '20', '14'], ['2026 돌봄 혁신 지원', '<span class="badge">임시저장</span>', '기간 미정', '15', '0'], ['2025 모두의 공모', '<span class="badge">마감</span>', '2025.05.26 ~ 07.11', '40', '198']]) + '</div>' +
+    '<div class="scr"><div class="crumb">신청 > 사업공모 > 공모사업 등록</div><div class="h1">공모사업 등록 <span class="badge">임시저장</span></div><div style="display:grid;grid-template-columns:1fr 300px;gap:14px"><div class="tile" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">' +
+    [['사업 제목', '2026 지역 상생 공모', 2], ['신청 시작일', '2026.11.24', 1], ['신청 마감일', '2026.12.05', 1], ['지원 대상', '지역 기반 비영리·사회적경제 조직', 2], ['지원 규모', '최대 3,000만 원', 1], ['모집 정원', '30', 1], ['수행 시작월', '2027.01', 1], ['수행 종료월', '2027.12', 1]].map(function (f) { return '<div style="grid-column:span ' + f[2] + '"><div class="lab">' + f[0] + '</div><div class="field cf" data-v="' + f[1] + '"></div></div>'; }).join('') +
+    '</div><div class="tile" id="img"><div class="lab">배너 (목록 가로)</div><div class="ib" style="height:70px;border-radius:8px;border:1px dashed #4a372d;margin-bottom:12px"></div><div class="lab">포스터 (상세 세로)</div><div class="ib" style="height:210px;width:150px;border-radius:8px;border:1px dashed #4a372d"></div></div></div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><span class="btn g">임시저장</span><span class="btn g" id="pv">참여자 화면 미리보기</span><span class="btn" id="pb">게시하기</span></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), cf = qa(pc, '.cf'), ib = qa(pc, '.ib'), nw = q(pc, '#nw'), pv = q(pc, '#pv'), pb = q(pc, '#pb');
+    var md = V.modal(pc, '<div class="lab">참여자 화면 미리보기</div><div style="display:flex;gap:16px;margin-top:8px"><div style="width:130px;height:180px;border-radius:8px;background:linear-gradient(160deg,#F5A733,#7a3d12)"></div><div style="flex:1"><span class="badge a">접수 중 · D-12</span><div style="font-size:22px;font-weight:800;margin:10px 0 6px">2026 지역 상생 공모</div><div class="mut" style="font-size:14px;line-height:1.7">지역 기반 비영리·사회적경제 조직<br>최대 3,000만 원 · 2027.01 ~ 12</div><span class="btn" style="margin-top:12px">신청하기</span></div></div>');
+    var to = V.toast(pc, '✓ 게시되었습니다 · 모집중');
+    return function (p) {
+      sc(p, [[0, 0], [2.2, 1], [15.4, 0]]);
+      cur(p, [[.6, { x: 500, y: 300 }], [1.2, nw], [10.0, pv], [13.9, pb]], [1.7, 10.5, 14.4]);
+      cf.forEach(function (f, i) { V.type(f, f.dataset.v, p, 2.8 + i * .65, 3.3 + i * .65); });
+      ib.forEach(function (b, i) { var on = p > 8.7 + i * .5; set(b, 'background', on ? (i ? 'linear-gradient(160deg,#F5A733,#7a3d12)' : 'linear-gradient(90deg,#7a3d12,#F5A733)') : 'transparent'); set(b, 'borderStyle', on ? 'solid' : 'dashed'); });
+      md.draw(p, 10.7, 13.6);
+      to(p, 14.5, 16.6);
+      var nr = p > 15.4;
+      set(q(pc, '#nn'), 'html', nr ? '2026 지역 상생 공모' : ''); set(q(pc, '#ns'), 'html', nr ? '<span class="badge a">모집중</span>' : ''); set(q(pc, '#nd'), 'html', nr ? '11.24 ~ 12.05' : ''); set(q(pc, '#nq'), 'html', nr ? '30' : ''); set(q(pc, '#nc'), 'html', nr ? '0' : '');
+      fo(p, [[8.6, 10.4, q(pc, '#img'), 6]]);
+    };
+  } });
+
+/* A2. 신청서 질문 */
+V.chapter(40, 56, { kind: 'admin', nav: '신청', cat: '신청', no: '03 · 신청', title: '신청서 질문 추가', path: '신청 > 사업공모 > 신청서 질문',
+  core: '공모마다 꼭 묻고 싶은 질문만 넣으면, 신청서에 그대로 나타나고 답변이 모입니다.',
+  steps: [[.2, '신청서 질문 열기', '공모 목록에서 그 공모의 「신청서 질문」을 엽니다'], [2.2, '질문과 답변 방식', '질문을 적고 답변 방식(짧은 답변·긴 답변·객관식)을 고릅니다'], [6.6, '보기·필수 정하기', '객관식이면 보기를 2개 이상 넣고, 필수 여부를 정합니다'], [9.8, '순서 조정', '↑ ↓ 로 순서를 바꾸면 신청 화면에 그 순서대로 나타납니다'], [12.4, '답변 확인', '신청이 들어오면 신청 상세의 「공모 질문 답변」에서 바로 봅니다']],
+  html: '<div class="scr"><div class="crumb">신청 > 사업공모 > 2026 지역 상생 공모</div><div class="h1">신청서 질문 <span class="badge" id="qc">2개</span></div>' +
+    '<div class="tile" id="ql" style="margin-bottom:12px">' + [['우리 지역에서 해결하고 싶은 문제는 무엇인가요?', '긴 답변 · 필수'], ['협력하고 있는 지역 기관이 있나요?', '짧은 답변 · 선택']].map(function (x, i) { return '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #382821;font-size:16px;font-weight:600"><span class="mut">' + (i + 1) + '</span><span style="flex:1">' + x[0] + '</span><span class="badge">' + x[1] + '</span><span class="mut">↑ ↓</span></div>'; }).join('') +
+    '<div id="q3" style="display:flex;align-items:center;gap:12px;padding:9px 0;font-size:16px;font-weight:600;opacity:0"><span class="mut">3</span><span style="flex:1">사업 종료 후에도 재단 소식을 받고 싶은 분야는?</span><span class="badge a">객관식 · 필수</span><span class="mut" id="up">↑ ↓</span></div></div>' +
+    '<div class="tile" id="fm"><h3>질문 추가</h3><div class="lab">질문</div><div class="field" id="qt" style="margin-bottom:10px"></div><div style="display:flex;gap:18px;align-items:flex-start"><div><div class="lab">답변 방식</div><div style="display:flex;gap:6px">' + ['짧은 답변', '긴 답변', '객관식'].map(function (x) { return '<span class="btn g am" style="padding:6px 12px">' + x + '</span>'; }).join('') + '</div></div>' +
+    '<div style="flex:1"><div class="lab">보기</div><div style="display:flex;gap:6px;flex-wrap:wrap">' + ['교육', '판로', '네트워킹', '후속 공모'].map(function (x) { return '<span class="badge op" style="opacity:0;font-size:14px">' + x + '</span>'; }).join('') + '</div></div><div><div class="lab">필수 여부</div><span class="btn g" id="rq" style="padding:6px 12px">선택</span></div></div><div style="text-align:right;margin-top:12px"><span class="btn" id="ad">질문 추가</span></div></div></div>' +
+    '<div class="scr"><div class="crumb">신청 > 신청현황 > 새봄협동조합</div><div class="h1">신청 상세</div><div class="tile"><h3>공모 질문 답변</h3>' + [['우리 지역에서 해결하고 싶은 문제는 무엇인가요?', '돌봄 인력이 부족해 어르신 돌봄 대기가 길어지고 있습니다. 주민을 돌봄 강사로 양성하려 합니다.'], ['협력하고 있는 지역 기관이 있나요?', '성동구 마을돌봄센터, 지역 복지관 2곳'], ['사업 종료 후에도 재단 소식을 받고 싶은 분야는?', '판로 · 후속 공모']].map(function (x) { return '<div class="an" style="padding:10px 0;border-bottom:1px solid #382821"><div class="mut" style="font-size:14px;font-weight:700">' + x[0] + '</div><div style="font-size:17px;font-weight:600;margin-top:3px">' + x[1] + '</div></div>'; }).join('') + '</div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), am = qa(pc, '.am'), ops = qa(pc, '.op'), rq = q(pc, '#rq'), ad = q(pc, '#ad'), q3 = q(pc, '#q3'), an = qa(pc, '.an');
+    return function (p) {
+      sc(p, [[0, 0], [12.4, 1]]);
+      V.type(q(pc, '#qt'), '사업 종료 후에도 재단 소식을 받고 싶은 분야는?', p, 2.4, 4.4);
+      cur(p, [[2.0, { x: 500, y: 450 }], [4.6, am[2]], [7.8, rq], [8.6, ad], [10.2, q(pc, '#up')]], [5.1, 8.2, 9.1, 10.7]);
+      am.forEach(function (b, i) { var on = i === 2 && p > 5.1; set(b, 'background', on ? '#F5A733' : 'transparent'); set(b, 'color', on ? '#1d1206' : '#F7EFE8'); set(b, 'borderColor', on ? '#F5A733' : '#4a372d'); });
+      ops.forEach(function (o, i) { set(o, 'opacity', seg(p, 6.6 + i * .3, 6.9 + i * .3)); });
+      set(rq, 'html', p > 8.2 ? '필수' : '선택'); set(rq, 'color', p > 8.2 ? '#F5A733' : '#F7EFE8');
+      set(q3, 'opacity', seg(p, 9.2, 9.7)); set(q(pc, '#qc'), 'html', p > 9.2 ? '3개' : '2개');
+      fo(p, [[10, 12.2, q(pc, '#ql'), 6]]);
+      an.forEach(function (a, i) { show(a, p, 12.8 + i * .4, 8); });
+    };
+  } });
+
+/* A3. 신청 접수 */
+V.chapter(56, 72, { kind: 'admin', nav: '신청', cat: '신청', no: '04 · 신청', title: '신청 접수 확인', path: '신청 > 신청현황',
+  core: '접수된 신청을 한 목록에서 찾고, 상세에서 서류·금액을 확인해 심사로 넘깁니다.',
+  steps: [[.2, '신청현황 목록', '신청 > 신청현황에서 접수 단계의 신청을 봅니다'], [2.6, '검색·필터', '기관명·접수번호로 검색하고 사업·단계·담당자로 걸러 냅니다'], [6, '신청 상세 확인', '접수번호·신청일·총 신청금액과 신청 서류를 확인합니다'], [10.4, '담당자 지정', '이 신청을 맡을 담당자를 정합니다'], [12.6, '심사 중으로 변경', '진행 단계를 「심사 중」으로 바꾸면 선정현황으로 넘어갑니다']],
+  html: '<div class="scr"><div class="crumb">신청 > 신청현황</div><div class="h1">신청현황 <span class="badge">2026 지역 상생 공모</span></div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:12px" id="flt"><div class="field" style="width:300px" id="sq"><span class="mut">기관명 · 접수번호 검색</span></div><span class="field" style="font-size:15px">사업: 2026 지역 상생 공모</span><span class="field" style="font-size:15px" id="fs">전체 단계</span><span class="field" style="font-size:15px">전체 담당자</span></div>' +
+    tbl(['접수번호', '기관명', '지역', '>신청금액(원)', '진행 단계', '담당'], [['2026-031', '새봄협동조합', '서울 성동구', '30,000,000', '<span class="badge a">접수 완료</span>', '미배정'], ['2026-030', '다온청년랩', '부산 동구', '25,000,000', '<span class="badge a">접수 완료</span>', '창업육성팀'], ['2026-028', '늘해랑돌봄', '광주 북구', '18,000,000', '<span class="badge">심사 중</span>', '창업육성팀'], ['2026-027', '바람길문화협동조합', '강원 춘천', '30,000,000', '<span class="badge">작성중</span>', '-']]) + '</div>' +
+    '<div class="scr"><div class="crumb">신청 > 신청현황 > 새봄협동조합</div><div class="h1">신청 상세 <span class="badge" id="stg">접수 완료</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+    '<div class="tile" id="bi"><h3>신청 기본정보</h3><div style="font-size:17px;font-weight:600;line-height:2.1"><div><span class="mut">접수번호</span> 2026-031</div><div><span class="mut">신청일</span> 2026.11.28</div><div><span class="mut">총 신청금액</span> 30,000,000원</div><div><span class="mut">신청 서류</span> <span class="badge ok">사업계획서.hwpx</span> <span class="badge ok">예산계획.xlsx</span></div></div></div>' +
+    '<div style="display:grid;gap:14px;align-content:start"><div class="tile" id="mg"><h3>담당자</h3><div class="field" id="mv"></div></div><div class="tile" id="sg"><h3>진행 단계</h3><div style="display:flex;gap:6px;flex-wrap:wrap">' + ['접수 완료', '심사 중', '선정', '미선정'].map(function (x) { return '<span class="btn g sb" style="padding:6px 12px">' + x + '</span>'; }).join('') + '</div></div></div></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), sq = q(pc, '#sq'), r0 = q(pc, '.rw'), sb = qa(pc, '.sb'), stg = q(pc, '#stg');
+    var to = V.toast(pc, '✓ 단계가 「심사 중」으로 바뀌었습니다');
+    return function (p) {
+      sc(p, [[0, 0], [5.8, 1]]);
+      if (p > 2.8) V.type(sq, '새봄', p, 3, 3.6);
+      fo(p, [[2.7, 5.4, q(pc, '#flt'), 6], [6.2, 10.2, q(pc, '#bi'), 6]]);
+      cur(p, [[4.2, { x: 400, y: 300 }], [4.8, q(r0, 'td')], [10.3, q(pc, '#mv')], [12.4, sb[1]]], [5.3, 10.8, 13.0]);
+      V.type(q(pc, '#mv'), '창업육성팀 담당', p, 11.0, 11.8);
+      var lab = p > 13.0 ? '심사 중' : '접수 완료';
+      sb.forEach(function (b) { var on = b.textContent === lab; set(b, 'background', on ? '#F5A733' : 'transparent'); set(b, 'color', on ? '#1d1206' : '#F7EFE8'); set(b, 'borderColor', on ? '#F5A733' : '#4a372d'); });
+      set(stg, 'html', lab); to(p, 13.1, 15.4);
+    };
+  } });
+
+/* A4. 심사·선정·결과 발표 */
+V.chapter(72, 94, { kind: 'admin', nav: '심사', cat: '심사', no: '05 · 심사', title: '심사·선정·결과 발표', path: '심사 > 선정현황',
+  core: '선정·미선정을 정하고 「결과 발표」를 누르면, 공고와 함께 기관이 직접 결과를 확인합니다.',
+  steps: [[.2, '심사 의견 기록', '선정현황에서 신청을 열어 심사 의견을 적고 저장합니다'], [4.4, '선정·미선정 결정', '진행 단계에서 「선정」 또는 「미선정」을 고릅니다'], [7.4, '결과 발표 칸 확인', '선정·미선정·심사 중 건수를 확인합니다. 심사 중이 남아 있으면 발표할 수 없습니다'], [10.4, '공고·안내문 작성', '공고 제목과 선정·미선정 안내문을 적습니다 (기본 문구 제공)'], [14.4, '결과 발표하기', '「결과 발표하기」를 누르면 기관마다 자기 결과가 공고와 함께 표시되고 안내함에도 들어갑니다'], [18.6, '발표 전엔 「심사 중」', '발표 전에는 기관 화면에 「심사 중」으로만 보여, 결과가 먼저 새지 않습니다']],
+  html: '<div class="scr"><div class="crumb">심사 > 선정현황 > 새봄협동조합</div><div class="h1">신청·심사 내용 <span class="badge" id="stg">심사 중</span></div><div style="display:grid;grid-template-columns:1fr 340px;gap:14px">' +
+    '<div class="tile" id="op"><h3>심사 의견</h3><div class="field" id="ot" style="min-height:120px;line-height:1.6"></div><div style="text-align:right;margin-top:10px"><span class="btn g" id="sv">저장</span></div></div>' +
+    '<div class="tile" id="sg"><h3>진행 단계</h3><div style="display:flex;gap:6px;flex-wrap:wrap">' + ['심사 중', '선정', '미선정'].map(function (x) { return '<span class="btn g sb" style="padding:6px 12px">' + x + '</span>'; }).join('') + '</div></div></div></div>' +
+    '<div class="scr"><div class="crumb">심사 > 선정현황</div><div class="h1">선정현황 <span class="badge">2026 지역 상생 공모</span></div>' +
+    '<div class="tile" id="ra" style="border-color:rgba(245,167,51,.55)"><div style="display:flex;align-items:center;gap:14px;margin-bottom:12px"><h3 style="margin:0">결과 발표</h3><span class="badge" id="rs">발표 전</span><span style="flex:1"></span><span style="font-size:16px;font-weight:700">선정 <b style="color:#8fd0a8">30</b> · 미선정 <b>94</b> · 심사 중 <b id="rv" style="color:#f0946c">0</b></span></div>' +
+    '<div class="lab">공고 제목</div><div class="field" id="nt" style="margin-bottom:10px"></div><div class="grid2"><div><div class="lab">선정 안내문</div><div class="field" id="n1" style="min-height:66px;line-height:1.5;font-size:15px"></div></div><div><div class="lab">미선정 안내문</div><div class="field" id="n2" style="min-height:66px;line-height:1.5;font-size:15px"></div></div></div>' +
+    '<div style="text-align:right;margin-top:12px"><span class="btn" id="go">결과 발표하기</span></div></div>' +
+    '<div class="tile" id="pvw" style="margin-top:12px;display:flex;gap:14px;align-items:center;font-size:16px;font-weight:600"><span class="mut">기관 화면</span><span class="badge" id="pv1">심사 중</span><span class="mut" id="pv2">발표 전에는 결과가 보이지 않습니다</span></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), sb = qa(pc, '.sb'), sv = q(pc, '#sv'), go = q(pc, '#go'), stg = q(pc, '#stg');
+    var md = V.modal(pc, '<h3 style="margin:0 0 8px;font-size:20px">결과를 발표하시겠습니까?</h3><div class="mut" style="font-size:15px;line-height:1.6">신청 기관 124곳의 화면과 안내함에 각자의 결과가 표시됩니다.</div><div style="text-align:right;margin-top:16px"><span class="btn g">취소</span> <span class="btn" id="cf">발표</span></div>');
+    var cf = q(md.el, '#cf'), to = V.toast(pc, '✓ 결과가 발표되었습니다 · 124곳 안내함에 표시');
+    var D1 = '2026 지역 상생 공모 선정 결과 안내', D2 = '2026 지역 상생 공모에 선정되었습니다. 사업관리에서 협약·예산 안내를 확인해 주십시오.', D3 = '아쉽게도 이번 2026 지역 상생 공모에는 선정되지 않았습니다. 관심 가져 주셔서 감사합니다.';
+    return function (p) {
+      sc(p, [[0, 0], [7.2, 1]]);
+      V.type(q(pc, '#ot'), '지역 돌봄 인력 문제를 주민 양성으로 푸는 구조가 명확함. 협력 기관 2곳 확보.', p, .6, 3.2);
+      cur(p, [[.3, { x: 400, y: 300 }], [3.4, sv], [4.8, sb[1]], [13.4, go], [15.2, cf]], [3.9, 5.3, 14.0, 15.8]);
+      var lab = p > 5.3 ? '선정' : '심사 중';
+      sb.forEach(function (b) { var on = b.textContent === lab; set(b, 'background', on ? '#F5A733' : 'transparent'); set(b, 'color', on ? '#1d1206' : '#F7EFE8'); set(b, 'borderColor', on ? '#F5A733' : '#4a372d'); });
+      set(stg, 'html', lab); set(stg, 'cls', 'badge' + (p > 5.3 ? ' ok' : ''));
+      set(q(pc, '#nt'), 'html', p > 10.6 ? D1 : ''); set(q(pc, '#n1'), 'html', p > 10.9 ? D2 : ''); set(q(pc, '#n2'), 'html', p > 11.2 ? D3 : '');
+      md.draw(p, 14.1, 16.0);
+      var done = p > 15.9;
+      set(q(pc, '#rs'), 'html', done ? '발표 완료 · 11.30 14:00' : '발표 전'); set(q(pc, '#rs'), 'cls', 'badge' + (done ? ' ok' : ''));
+      set(q(pc, '#pv1'), 'html', done ? '선정되었습니다' : '심사 중'); set(q(pc, '#pv1'), 'cls', 'badge' + (done ? ' ok' : ''));
+      set(q(pc, '#pv2'), 'html', done ? '공고 제목·안내문과 함께 표시됩니다' : '발표 전에는 결과가 보이지 않습니다');
+      to(p, 16.0, 18.2);
+      fo(p, [[7.6, 10.2, q(pc, '#ra'), 6], [18.8, 21.6, q(pc, '#pvw'), 6]]);
+    };
+  } });
+
+/* 1. 예산·정산 검토 */
+V.chapter(94, 111, { kind: 'admin', nav: '사업관리', cat: '사업관리', no: '06 · 사업관리', title: '예산·정산 검토', path: '사업관리 > 예산·정산관리',
+  core: '매달 하던 검토 그대로. 승인·보완 기록이 쌓여 사후관리 지표가 됩니다.',
+  steps: [[.2, '검토할 달 선택', '사업관리 > 예산·정산관리에서 검토할 달을 고릅니다'], [2.6, '검토 대기 건 열기', '검토 대기 표시가 붙은 기관의 예산신청서를 엽니다'], [5.4, '산출근거·잔액 대조', '항목별 산출근거와 금액, 신청 반영 잔액을 확인합니다'], [9, '승인 또는 보완 요청', '문제가 없으면 승인, 고칠 점이 있으면 사유를 적어 보완 요청합니다'], [12.8, '제출·지연이 자동 집계', '제출일과 기한(매월 말일)이 남아 미제출·지연이 자동으로 집계됩니다']],
+  html: '<div class="scr" id="s0"><div class="crumb">사업관리 > 예산·정산관리</div><div class="h1">예산·정산관리 <span class="badge">2026 지역 상생 공모</span></div>' +
+    '<div class="tabs"><span>2026.09</span><span>2026.10</span><span id="m11">2026.11</span></div>' +
+    tbl(['기관명', '서류', '>금액(원)', '제출일', '상태'], [['새봄협동조합', '예산신청서', '4,200,000', '11.03', '<span id="b1" class="badge a">검토 대기</span>'], ['다온청년랩', '지출결과서', '3,180,000', '11.05', '<span class="badge ok">승인</span>'], ['늘해랑돌봄', '예산신청서', '2,750,000', '11.06', '<span class="badge ok">승인</span>'], ['푸른손작업장', '지출결과서', '1,960,000', '11.08', '<span class="badge w">보완요청</span>'], ['하루공방', '예산신청서', '-', '-', '<span class="badge w">미제출</span>']]) +
+    '<div id="sum" class="tile" style="margin-top:16px;display:flex;gap:30px;font-size:17px;font-weight:600"><span class="mut">11월 · 기한 11.30</span><span>제출 <b style="color:#F5A733">36</b>곳</span><span>미제출 <b style="color:#f0946c">2</b>곳</span><span>보완요청 <b>1</b>건</span></div></div>' +
+    '<div class="scr" id="s1"><div class="crumb">사업관리 > 예산·정산관리 > 새봄협동조합</div><div class="h1">예산신청서 · 11월 <span class="badge a">검토 대기</span></div>' +
+    '<div class="tile" id="dt">' + tbl(['목', '세목', '산출근거', '>신청액', '>잔액(신청 반영)'], [['인건비', '보수', '사업 담당 1명 × 1개월', '2,400,000', '19,200,000'], ['사업비', '교육비', '주민 교육 3회 × 400,000', '1,200,000', '8,400,000'], ['관리운영비', '인쇄비', '교육 자료 120부', '600,000', '2,100,000']]) + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:end;margin-top:16px"><div><div class="lab">검토 의견·보완 요청 사유</div><div class="field" id="op"></div></div><span class="btn g">보완요청</span><span class="btn" id="ok">승인</span></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), to = V.toast(pc, '✓ 승인되었습니다 · 기관 화면에 바로 표시됩니다');
+    var m11 = q(pc, '#m11'), r1 = q(pc, '#s0 .rw'), b1 = q(pc, '#b1'), op = q(pc, '#op'), ok = q(pc, '#ok'), dt = q(pc, '#dt'), sum = q(pc, '#sum');
+    return function (p) {
+      sc(p, [[0, 0], [3.4, 1], [12.4, 0]]);
+      set(m11, 'cls', p > 1.2 ? 'on' : '');
+      cur(p, [[.4, { x: 600, y: 300 }], [1.0, m11], [2.8, r1], [8.6, op], [10.8, ok]], [1.2, 3.1, 8.9, 11.2]);
+      V.type(op, '산출근거·잔액 확인 완료', p, 9.2, 10.4);
+      set(b1, 'html', p > 11.2 ? '승인' : '검토 대기'); set(b1, 'cls', 'badge ' + (p > 11.2 ? 'ok' : 'a'));
+      fo(p, [[5.4, 8.6, dt, 6], [13.2, 16.6, sum, 6]]);
+      to(p, 11.3, 13.0);
+    };
+  } });
+
+/* 2. 성과관리 */
+V.chapter(111, 125, { kind: 'admin', nav: '사업관리', cat: '사업관리', no: '07 · 사업관리', title: '성과 확인', path: '사업관리 > 성과관리',
+  core: '기관이 입력한 실적이 달성률과 진척 경고로 바로 바뀝니다.',
+  steps: [[.2, '기관 선택', '사업관리 > 성과관리에서 기관을 고릅니다'], [2.6, '목표 대비 실적', '지표별 목표와 실적, 달성률이 자동으로 계산됩니다'], [7, '뒤처진 지표 표시', '기간 경과율보다 진척이 늦은 지표는 따로 표시됩니다'], [10.5, '보고서로 이어짐', '목표 달성 지표 수와 달성 비율은 보고서에 그대로 모입니다']],
+  html: '<div class="scr"><div class="crumb">사업관리 > 성과관리</div><div class="h1">성과관리 <span class="badge">새봄협동조합</span><span class="mut" style="font-size:15px;font-weight:600">기간 경과율 75%</span></div>' +
+    '<div class="tile" style="display:grid;gap:22px;padding:24px 26px">' +
+    [['지역 주민 교육 참여', 120, 96, '명'], ['일자리 연계', 10, 4, '건'], ['협력 네트워크 구축', 5, 5, '곳'], ['참여자 만족도', 90, 88, '점']].map(function (k, i) {
+      return '<div class="kp" data-k="' + (k[2] / k[1]) + '" data-v="' + k[2] + '"><div style="display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:600;margin-bottom:9px"><span>' + k[0] + (i === 1 ? ' <span class="badge w lag" style="opacity:0">진척 늦음</span>' : '') + '</span><span class="mut">실적 <b class="v" style="color:#F7EFE8">0</b> / 목표 ' + k[1] + k[3] + ' · <b class="pct" style="color:#F5A733">0%</b></span></div><div class="track" style="position:relative"><div class="fill"></div><i style="position:absolute;left:75%;top:-4px;bottom:-4px;width:2px;background:rgba(247,239,232,.35)"></i></div></div>';
+    }).join('') + '</div><div class="grid3" style="margin-top:14px" id="rep"><div class="tile kpi"><div class="l">지표 수</div><div class="n">4<small>개</small></div></div><div class="tile kpi"><div class="l">목표 달성</div><div class="n">1<small>개</small></div></div><div class="tile kpi"><div class="l">달성 비율</div><div class="n">25<small>%</small></div></div></div></div>',
+  draw: function (pc) {
+    var ks = qa(pc, '.kp'), lag = q(pc, '.lag'), fo = V.focus(pc), rep = q(pc, '#rep');
+    V.screens(pc)(0, []);
+    return function (p) {
+      ks.forEach(function (k, i) { var r = +k.dataset.k, a = 2.6 + i * .3, b = a + 2.6; set(q(k, '.fill'), 'width', (r * eo((p - a) / (b - a)) * 100) + '%'); count(q(k, '.v'), +k.dataset.v, p, a, b); count(q(k, '.pct'), r * 100, p, a, b, '%'); });
+      set(lag, 'opacity', seg(p, 7.2, 7.8));
+      show(rep, p, 10.6, 10);
+      fo(p, [[7.2, 10.3, ks[1], 8], [10.8, 13.6, rep, 6]]);
+    };
+  } });
+
+/* 3. 5축 진단 → 4분류 (정량) */
+var AX = [['회계·행정 역량', '안정성', 3], ['자립 가능성', '안정성', 2], ['사업수행 역량', '잠재력', 3], ['성과 달성도', '잠재력', 3], ['재단 연계 관심', '잠재력', 2]];
+var GUIDE = { 성장연계: '안정적이고 잠재력이 높습니다. 재단 타사업 연계, 우수사례·네트워크 허브, 모금 스토리 대상으로 권장합니다.', 집중관리: '잠재력은 높으나 안정성이 낮습니다. 멘토·회계사 연계와 분기 점검 등 후속지원을 우선 배정합니다.' };
+V.chapter(125, 149, { kind: 'admin', nav: '신청', cat: '사후관리 · 정량', no: '08 · 사후관리 · 정량', title: '5축 진단으로 분류', path: '신청 > 신청현황 > 기관 상세',
+  core: '다섯 항목에 미흡·보통·우수만 고르면, 필요한 후속지원이 자동으로 분류됩니다.',
+  steps: [[.2, '5축 진단 칸 열기', '신청현황에서 기관을 열고 「5축 진단 · 분류」 칸을 찾습니다'], [2.4, '다섯 항목 점수 선택', '회계·행정, 자립, 사업수행, 성과, 재단 연계를 미흡·보통·우수로 고릅니다'], [9.8, '안정성·잠재력 합산', '안정성은 6점 중 5점 이상, 잠재력은 9점 중 7점 이상이면 「높음」입니다'], [13.4, '4분류 자동 판정', '두 점수로 성장연계·집중관리·일반 모니터링·관찰 중 하나가 정해집니다'], [16.4, '분류별 대응 지침', '분류마다 다음에 할 후속지원이 함께 안내됩니다'], [19.8, '점수가 바뀌면 분류도', '회계·행정이 미흡으로 바뀌면 집중관리가 되고 멘토·회계사 연계가 권장됩니다']],
+  html: '<div class="scr"><div class="crumb">신청 > 신청현황 > 기관 상세</div><div class="h1">새봄협동조합 <span class="badge">5축 진단 · 분류</span></div>' +
+    '<div style="display:grid;grid-template-columns:520px 1fr;gap:16px"><div class="tile" id="ax">' + AX.map(function (a, i) {
+      return '<div class="axr" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #382821"><span style="font-size:18px;font-weight:700">' + a[0] + '<br><span class="mut" style="font-size:13px;font-weight:600">' + a[1] + '</span></span><span style="display:flex;gap:6px">' + ['미흡', '보통', '우수'].map(function (l, v) { return '<span class="op btn g" data-v="' + (v + 1) + '" style="padding:7px 13px;font-size:15px">' + l + '</span>'; }).join('') + '</span></div>';
+    }).join('') + '<div class="mut" style="font-size:13px;margin-top:10px">담당자가 분류를 직접 지정하면 자동 판정보다 우선합니다.</div></div>' +
+    '<div style="display:grid;gap:14px;align-content:start"><div class="grid2"><div class="tile kpi" id="g1"><div class="l">안정성</div><div class="n"><span id="st">0</span><small>/ 6점 · 5점 이상 높음</small></div></div><div class="tile kpi" id="g2"><div class="l">잠재력</div><div class="n"><span id="po">0</span><small>/ 9점 · 7점 이상 높음</small></div></div></div>' +
+    '<div class="tile" id="mx"><div style="display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;font-size:15px;font-weight:700;text-align:center"><span></span><span class="mut">잠재력 높음</span><span class="mut">잠재력 낮음</span><span class="mut" style="align-self:center">안정성<br>높음</span><span class="cl" data-c="성장연계"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#F5A733;margin-right:6px;vertical-align:0"></i>성장연계</span><span class="cl" data-c="일반 모니터링"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#8fd0a8;margin-right:6px;vertical-align:0"></i>일반 모니터링</span><span class="mut" style="align-self:center">안정성<br>낮음</span><span class="cl" data-c="집중관리"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e8c85a;margin-right:6px;vertical-align:0"></i>집중관리</span><span class="cl" data-c="관찰"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#cfc4bb;margin-right:6px;vertical-align:0"></i>관찰</span></div></div>' +
+    '<div class="tile" id="gd" style="border-left:3px solid #F5A733"><div class="lab">현재 분류 · 대응 지침</div><div id="gt" style="font-size:18px;font-weight:600;line-height:1.55"></div></div></div></div></div>',
+  draw: function (pc) {
+    var cur = V.cursor(pc), fo = V.focus(pc), rows = qa(pc, '.axr'), st = q(pc, '#st'), po = q(pc, '#po'), cls = qa(pc, '.cl'), gt = q(pc, '#gt'), mx = q(pc, '#mx'), gd = q(pc, '#gd'), g1 = q(pc, '#g1'), g2 = q(pc, '#g2');
+    V.screens(pc)(0, []);
+    cls.forEach(function (c) { c.style.padding = '18px 6px'; c.style.borderRadius = '10px'; c.style.border = '1px solid #382821'; });
+    var CT = [3.0, 4.3, 5.6, 6.9, 8.2], keys = [[2.4, { x: 300, y: 200 }]], clicks = [];
+    rows.forEach(function (r, i) { keys.push([CT[i] - .5, qa(r, '.op')[AX[i][2] - 1]]); clicks.push(CT[i]); });
+    keys.push([20.0, qa(rows[0], '.op')[0]]); clicks.push(20.5);
+    return function (p) {
+      cur(p, keys, clicks);
+      var sc = AX.map(function (a, i) { return p > CT[i] ? a[2] : 0; }); if (p > 20.5) sc[0] = 1;
+      rows.forEach(function (r, i) { qa(r, '.op').forEach(function (o) { var on = +o.dataset.v === sc[i]; set(o, 'background', on ? '#F5A733' : 'transparent'); set(o, 'color', on ? '#1d1206' : '#F7EFE8'); set(o, 'borderColor', on ? '#F5A733' : '#4a372d'); }); });
+      var S = sc[0] + sc[1], P = sc[2] + sc[3] + sc[4], k = seg(p, 9.9, 11.2), filled = sc.every(function (v) { return v > 0; });
+      set(st, 'html', String(p > 20.5 ? S : Math.round(S * k))); set(po, 'html', String(Math.round(P * k)));
+      var lab = !filled || p < 13.4 ? '' : (S >= 5 ? (P >= 7 ? '성장연계' : '일반 모니터링') : (P >= 7 ? '집중관리' : '관찰'));
+      cls.forEach(function (c) { var on = c.dataset.c === lab; set(c, 'background', on ? 'rgba(245,167,51,.16)' : 'transparent'); set(c, 'borderColor', on ? '#F5A733' : '#382821'); set(c, 'color', on ? '#F7EFE8' : '#9c8a7d'); });
+      set(gt, 'html', p > 16.4 && lab ? '<b style="color:#F5A733">' + lab + '</b>: ' + GUIDE[lab] : '<span class="mut">5축 진단을 모두 입력하면 자동으로 분류됩니다.</span>');
+      fo(p, [[2.4, 9.4, q(pc, '#ax'), 6], [9.9, 13.2, g1.parentNode, 6], [13.5, 16.2, mx, 6], [16.5, 19.7, gd, 6], [20.7, 23.6, gd, 6]]);
+    };
+  } });
+
+/* 4. 사후관리 대상 (정량 지표) */
+V.chapter(149, 167, { kind: 'admin', nav: '사후관리', cat: '사후관리 · 정량', no: '09 · 사후관리 · 정량', title: '연락할 기관 찾기', path: '사후관리 > 사후관리',
+  core: '숫자가 먼저 「누구에게 연락할지」를 알려 줍니다.',
+  steps: [[.2, '지표 4개 확인', '대상 기관, 30일 이상 연락 없음, 지연 제출, 설문 미응답이 먼저 보입니다'], [5, '연락이 끊긴 기관 찾기', '마지막 연락이 오래된 기관이 목록에서 바로 드러납니다'], [9.5, '지연·미응답도 함께', '제출 지연과 설문 미응답을 같은 줄에서 확인합니다'], [13.5, '기관 상세 열기', '먼저 연락할 기관을 열어 상세 기록으로 들어갑니다']],
+  html: '<div class="scr"><div class="crumb">사후관리 > 사후관리</div><div class="h1">사후관리 대상</div><div class="grid4" style="margin-bottom:16px" id="kp">' +
+    [['대상 기관', 38, ''], ['30일 이상 연락 없음', 7, ' hot'], ['지연 제출 기관', 5, ''], ['설문 미응답 기관', 9, '']].map(function (k) { return '<div class="tile kpi' + k[2] + '"><div class="l">' + k[0] + '</div><div class="n"><span class="c" data-v="' + k[1] + '">0</span><small>곳</small></div></div>'; }).join('') + '</div>' +
+    tbl(['기관명', '참여 사업', '마지막 연락', '제출 지연', '설문'], [['하루공방', '2025 모두의 공모', '<b style="color:#f0946c">47일 전</b>', '3건 · 최대 12일', '<span class="badge w">미응답</span>'], ['푸른손작업장', '2025 모두의 공모', '<b style="color:#f0946c">39일 전</b>', '지연 없음', '<span class="badge ok">응답</span>'], ['온기마을사회적협동조합', '2025 모두의 공모', '<b style="color:#f0946c">33일 전</b>', '1건 · 최대 4일', '<span class="badge w">미응답</span>'], ['새봄협동조합', '2025 모두의 공모 외 1', '12일 전', '지연 없음', '<span class="badge ok">응답</span>'], ['다온청년랩', '2025 모두의 공모', '8일 전', '지연 없음', '<span class="badge ok">응답</span>']]) + '</div>',
+  draw: function (pc) {
+    var ks = qa(pc, '.kpi'), rs = qa(pc, '.rw'), fo = V.focus(pc), cur = V.cursor(pc);
+    V.screens(pc)(0, []);
+    return function (p) {
+      ks.forEach(function (k, i) { count(q(k, '.c'), +q(k, '.c').dataset.v, p, .6 + i * .25, 3.2 + i * .25); });
+      rs.forEach(function (r, i) { show(r, p, 1.2 + i * .15, 8); });
+      fo(p, [[.6, 4.8, q(pc, '#kp'), 6], [5.2, 9.3, rs[0].parentNode, 4], [9.7, 13.2, rs[0], 4]]);
+      cur(p, [[13.6, { x: 700, y: 600 }], [14.6, q(rs[0], 'td')]], [15.4]);
+      set(rs[0], 'background', p > 15.4 ? 'rgba(245,167,51,.1)' : 'transparent');
+    };
+  } });
+
+/* 5. 사후관리 기록 (정성) */
+V.chapter(167, 187, { kind: 'admin', nav: '사후관리', cat: '사후관리 · 정성', no: '10 · 사후관리 · 정성', title: '통화하고 기록 남기기', path: '사후관리 > 사후관리 > 기관 상세',
+  core: '숫자가 「누구」를 알려 주면, 기록은 「왜·어떻게」를 남깁니다.',
+  steps: [[.2, '상세의 숫자 확인', '제출 지연 건수·최대·평균 일수와 마지막 연락일을 확인합니다'], [4, '사후관리 기록 추가', '통화나 방문 뒤 「사후관리 기록 추가」에 날짜와 내용을 적습니다'], [11, '저장하면 최신순으로', '기록은 최신순으로 쌓이고 마지막 연락일이 오늘로 바뀝니다'], [15, '수정·삭제 이력 보존', '변경 전 내용과 삭제 이력은 남고, 서술은 권한 있는 사람만 봅니다']],
+  html: '<div class="scr"><div class="crumb">사후관리 > 사후관리 > 기관 상세</div><div class="h1">하루공방 <span class="badge">사회적기업 · 경기 수원</span></div>' +
+    '<div class="grid3" id="nums" style="margin-bottom:14px"><div class="tile kpi"><div class="l">제출 지연</div><div class="n" style="font-size:30px">3<small>건 · 최대</small> 12<small>일 · 평균</small> 6<small>일</small></div></div><div class="tile kpi"><div class="l">마지막 연락</div><div class="n" id="lc" style="font-size:30px"></div></div><div class="tile kpi"><div class="l">분류</div><div class="n" style="font-size:30px"><i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e8c85a;margin-right:6px;vertical-align:0"></i>집중관리</div></div></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div class="tile" id="fm"><h3>사후관리 기록 추가</h3><div class="lab">날짜</div><div class="field" style="margin-bottom:10px">2026.11.23</div><div class="lab">내용</div><div class="field" id="tx" style="min-height:132px;line-height:1.6;white-space:normal"></div><div style="text-align:right;margin-top:10px"><span class="btn" id="sv">기록 추가</span></div></div>' +
+    '<div class="tile" id="ls"><h3>사후관리 기록 (최신순)</h3><div id="nw" style="opacity:0;padding:10px 0;border-bottom:1px solid #382821;font-size:16px;line-height:1.55"><span class="badge a">새 기록</span> <b>11.23</b> · 창업육성팀 담당<br>근황 통화: 공방 2호점 준비 중, 판로 연계 희망. 12월 얼라이언스 모임 안내.</div>' +
+    '<div style="padding:10px 0;border-bottom:1px solid #382821;font-size:16px;line-height:1.55"><b>10.07</b> · 창업육성팀 담당<br>결과보고 후 통화: 인력 1명 감원, 회계 부담 호소.</div><div style="padding:10px 0;font-size:16px;line-height:1.55"><b>09.02</b> · 만족도 조사 응답 4점<br><span class="mut" style="font-size:14px">수정됨 · 변경 전 내용 보존</span></div></div></div></div>',
+  draw: function (pc) {
+    var cur = V.cursor(pc), fo = V.focus(pc), tx = q(pc, '#tx'), sv = q(pc, '#sv'), nw = q(pc, '#nw'), lc = q(pc, '#lc');
+    V.screens(pc)(0, []);
+    var to = V.toast(pc, '✓ 기록이 추가되었습니다');
+    return function (p) {
+      fo(p, [[.4, 3.8, q(pc, '#nums'), 6], [11.3, 14.8, q(pc, '#ls'), 6], [15.2, 19.4, q(pc, '#ls'), 6]]);
+      cur(p, [[4, { x: 500, y: 300 }], [4.8, tx], [9.9, sv]], [5.2, 10.4]);
+      V.type(tx, '근황 통화: 공방 2호점 준비 중, 판로 연계 희망. 12월 얼라이언스 모임 안내.', p, 5.6, 9.8);
+      if (p > 9.9 && p < 10.6) set(sv, 'boxShadow', '0 0 0 3px rgba(245,167,51,.5)'); else set(sv, 'boxShadow', 'none');
+      set(nw, 'opacity', seg(p, 10.6, 11.2)); set(nw, 'transform', 'translateY(' + ((1 - seg(p, 10.6, 11.2)) * -14) + 'px)');
+      set(lc, 'html', p > 10.6 ? '<span style="color:#8fd0a8">오늘</span>' : '<span style="color:#f0946c">47일 전</span>');
+      to(p, 10.6, 12.4);
+    };
+  } });
+
+/* 6. 근황 조사 (정량 + 정성) */
+V.chapter(187, 209, { kind: 'admin', nav: '사후관리', cat: '사후관리 · 정량+정성', no: '11 · 사후관리 · 정량 + 정성', title: '근황 조사 보내고 받기', path: '사후관리 > 조사·설문',
+  core: '만족도 점수(숫자)와 근황(글)을 한 번에 묻고, 한 곳에서 받습니다.',
+  steps: [[.2, '조사·설문 만들기', '사후관리 > 조사·설문에서 새 조사를 만듭니다'], [2.4, '종류·제목·기한', '근황 조사를 고르고 제목과 응답 기한을 적습니다'], [5.8, '점수 문항 + 서술 문항', '만족도 점수 문항과 근황을 적는 서술 문항을 함께 넣습니다'], [8.8, '받는 곳 확인 후 시작', '수신거부·탈퇴 기관은 자동으로 빠지고, 참여 기관 안내함에 표시됩니다'], [12, '응답은 숫자와 글로', '응답 수와 평균 점수는 자동 집계되고, 서술 응답은 기관별로 모입니다'], [17.6, '미응답 안내 후 마감', '미응답 기관에 다시 안내한 기록을 남기고, 기한이 되면 마감합니다']],
+  html: '<div class="scr"><div class="crumb">사후관리 > 조사·설문</div><div class="h1">조사·설문 만들기</div><div style="display:grid;gap:12px">' +
+    '<div class="grid3"><div><div class="lab">종류</div><div class="field" id="kd"></div></div><div><div class="lab">제목</div><div class="field" id="tt"></div></div><div><div class="lab">응답 기한</div><div class="field" id="dl"></div></div></div>' +
+    '<div class="tile" id="qs"><h3>질문</h3><div class="qq" style="padding:10px 0;border-bottom:1px solid #382821;font-size:17px;font-weight:600">1. 지원받은 사업에 얼마나 만족하시나요? <span class="badge a">점수 1~5점</span></div><div class="qq" style="padding:10px 0;font-size:17px;font-weight:600">2. 지금 기관의 근황을 자유롭게 적어 주세요. <span class="badge">서술</span></div></div>' +
+    '<div class="tile" id="rc" style="display:flex;align-items:center;justify-content:space-between;font-size:18px;font-weight:600"><span>받는 곳 <b style="color:#F5A733">35곳</b> <span class="mut">· 수신거부·탈퇴 제외 3곳</span></span><span class="btn" id="go">조사 시작</span></div></div></div>' +
+    '<div class="scr"><div class="crumb">사후관리 > 조사·설문 > 2026 하반기 근황 조사</div><div class="h1">응답 현황 <span class="badge a" id="stt">진행 중</span></div><div style="display:grid;grid-template-columns:320px 1fr;gap:14px">' +
+    '<div style="display:grid;gap:14px;align-content:start"><div class="tile kpi" id="k1"><div class="l">응답</div><div class="n"><span id="rn">0</span><small>/ 35곳</small></div></div><div class="tile kpi" id="k2"><div class="l">평균 만족도</div><div class="n"><span id="av">0.0</span><small>/ 5점</small></div><div style="display:flex;gap:6px;align-items:flex-end;height:60px;margin-top:8px">' + [1, 2, 4, 12, 12].map(function (v, i) { return '<div style="flex:1;text-align:center"><div class="hb" data-v="' + v + '" style="height:0;background:#F5A733;border-radius:4px 4px 0 0"></div><div class="mut" style="font-size:12px">' + (i + 1) + '</div></div>'; }).join('') + '</div></div></div>' +
+    '<div style="display:grid;gap:14px;align-content:start"><div class="tile" id="nr"><h3>서술 응답</h3>' + [['새봄협동조합', '교육 수료생 6명이 마을 돌봄 강사로 활동 중입니다.'], ['다온청년랩', '내년에는 지역 기업과 공동 프로젝트를 준비하고 있습니다.'], ['하루공방', '2호점 준비 중인데 판로 연계 정보가 필요합니다.']].map(function (r) { return '<div class="ans" style="padding:9px 0;border-bottom:1px solid #382821;font-size:16px;line-height:1.5"><b>' + r[0] + '</b><br>' + r[1] + '</div>'; }).join('') + '</div>' +
+    '<div class="tile" id="un" style="display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600"><span>미응답 <b style="color:#f0946c">4곳</b></span><span style="flex:1"></span><span class="btn g" id="re">미응답 기관 안내 기록</span><span class="btn" id="cl">마감하기</span></div></div></div></div>',
+  draw: function (pc) {
+    var sc = V.screens(pc), cur = V.cursor(pc), fo = V.focus(pc), go = q(pc, '#go'), rn = q(pc, '#rn'), av = q(pc, '#av'), hb = qa(pc, '.hb'), ans = qa(pc, '.ans'), stt = q(pc, '#stt'), re = q(pc, '#re'), cl = q(pc, '#cl');
+    return function (p) {
+      sc(p, [[0, 0], [11.6, 1]]);
+      V.type(q(pc, '#kd'), '근황 조사', p, 2.5, 3.0); V.type(q(pc, '#tt'), '2026 하반기 근황 조사', p, 3.2, 4.4); V.type(q(pc, '#dl'), '2026.12.15', p, 4.6, 5.3);
+      fo(p, [[5.9, 8.6, q(pc, '#qs'), 6], [8.9, 10.6, q(pc, '#rc'), 6], [12.2, 15.2, q(pc, '#k1').parentNode, 6], [15.3, 17.4, q(pc, '#nr'), 6], [17.8, 21.4, q(pc, '#un'), 6]]);
+      cur(p, [[9.2, { x: 700, y: 500 }], [10.2, go], [18.2, re], [20.0, cl]], [10.7, 18.8, 20.5]);
+      var k = eo((p - 12.2) / 3); count(rn, 31, p, 12.2, 15.2); set(av, 'html', (4.3 * k).toFixed(1));
+      hb.forEach(function (h) { set(h, 'height', (+h.dataset.v * 4 * k) + 'px'); });
+      ans.forEach(function (a, i) { show(a, p, 15.4 + i * .4, 8); });
+      set(stt, 'html', p > 20.5 ? '마감' : '진행 중'); set(stt, 'cls', 'badge ' + (p > 20.5 ? '' : 'a'));
+    };
+  } });
+
+/* 7. 보고서 · 사후관리 판단 */
+V.chapter(209, 225, { kind: 'admin', nav: '사업관리', cat: '사후관리 · 보고', no: '12 · 사후관리 · 보고', title: '보고서로 한 번에', path: '사업관리 > 보고서',
+  core: '분류별 기관 수와 챙길 기관 목록이 보고서에 자동으로 모입니다.',
+  steps: [[.2, '보고서 열기', '사업관리 > 보고서에서 사업을 고릅니다'], [2.8, '분류별 기관 수', '5축 진단 분류별로 몇 곳인지 바로 보입니다'], [6.8, '챙길 기관 목록', '정산 부실, 후속관리 지연, 결과보고 반려 기관이 따로 모입니다'], [11.4, '기록 현황', '사후관리 기록이 있는 곳과 기록이 필요한 곳이 함께 집계됩니다']],
+  html: '<div class="scr"><div class="crumb">사업관리 > 보고서</div><div class="h1">보고서 <span class="badge">2025 모두의 공모</span></div><div class="tile"><h3>3. 사후관리 판단</h3><div id="rc" style="font-size:17px;font-weight:600;margin-bottom:14px">기록 등록 <b style="color:#F5A733">32</b>건 · 기록 필요 <b style="color:#f0946c">6</b>건</div>' +
+    '<div class="lab">5축 진단 분류</div><div id="cls" style="display:flex;gap:10px;margin-bottom:18px">' + [['<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#F5A733;margin-right:6px;vertical-align:0"></i>성장연계', 9], ['<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e8c85a;margin-right:6px;vertical-align:0"></i>집중관리', 8], ['<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#8fd0a8;margin-right:6px;vertical-align:0"></i>일반 모니터링', 14], ['<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#cfc4bb;margin-right:6px;vertical-align:0"></i>관찰', 5], ['미분류', 2]].map(function (c) { return '<div class="tile cc" style="padding:12px 16px;font-size:16px;font-weight:700">' + c[0] + ' <b class="cn" data-v="' + c[1] + '" style="font-size:22px;margin-left:6px;color:#F5A733">0</b></div>'; }).join('') + '</div>' +
+    '<div class="grid3" id="iss">' + [['정산 부실', '보완 요청 또는 정산 최하 등급', ['푸른손작업장']], ['후속관리 지연', '다음 접촉 예정일이 지난 건', ['하루공방 (11.10)', '온기마을사회적협동조합 (11.15)']], ['결과보고 반려', '보완 후 재제출 대기 중', ['바람길문화협동조합']]].map(function (c) { return '<div class="tile" style="background:#1d1410"><h3 style="margin-bottom:4px">' + c[0] + '</h3><div class="mut" style="font-size:13px;margin-bottom:8px">' + c[1] + '</div>' + c[2].map(function (n) { return '<div style="font-size:16px;font-weight:600;padding:4px 0">· ' + n + '</div>'; }).join('') + '</div>'; }).join('') + '</div></div></div>',
+  draw: function (pc) {
+    var fo = V.focus(pc), cn = qa(pc, '.cn'), cc = qa(pc, '.cc');
+    V.screens(pc)(0, []);
+    return function (p) {
+      cc.forEach(function (c, i) { show(c, p, 2.8 + i * .15, 8); }); cn.forEach(function (c) { count(c, +c.dataset.v, p, 3, 5); });
+      show(q(pc, '#iss'), p, 6.8, 10);
+      fo(p, [[3, 6.6, q(pc, '#cls'), 6], [7, 11.2, q(pc, '#iss'), 6], [11.6, 15, q(pc, '#rc'), 6]]);
+    };
+  } });
+
+/* 8. 개인정보 */
+V.chapter(225, 243, { kind: 'admin', nav: '사후관리', cat: '개인정보', no: '13 · 개인정보 보호', title: '원문은 필요할 때만', path: '사후관리 > 참여자 데이터 > 참여자 정보',
+  core: '원문과 서술은 권한 있는 사람만, 10분만, 기록을 남기고 봅니다.',
+  steps: [[.2, '가린 값으로 확인', '연락처·이메일은 평소 가린 값으로 보입니다'], [3, '원문 보기 → 비밀번호', '「원문 보기」를 누르고 본인 열람 비밀번호를 입력합니다'], [7, '10분 열람 허가', '「열람 허가 받기」를 누르면 10분 동안만 원문이 보입니다'], [11, '화면에서 지우기', '다 봤으면 「화면에서 지우기」로 바로 닫습니다'], [13.6, '접근 기록에 남음', '누가 언제 무엇을 봤는지 시스템 관리 > 접근 기록에 남습니다']],
+  html: '<div class="scr"><div class="crumb">사후관리 > 참여자 데이터 > 참여자 정보</div><div class="h1">하루공방 <span class="badge">대표자 정보</span></div>' +
+    '<div class="tile" id="pv" style="font-size:18px;display:grid;grid-template-columns:110px 1fr auto;gap:12px 16px;align-items:center"><span class="mut">연락처</span><span id="v1" style="font-family:monospace;font-size:21px">010-****-****</span><span id="ob" class="btn g">원문 보기</span><span class="mut">이메일</span><span id="v2" style="font-family:monospace;font-size:21px">ha****@****.kr</span><span id="er" class="btn g" style="opacity:0">화면에서 지우기</span></div>' +
+    '<div id="pm" class="tile" style="margin-top:12px;font-size:17px;font-weight:700;color:#F5A733;opacity:0">열람이 허가되었습니다 (14:12까지) <span id="tm" class="mut" style="font-weight:600"></span></div>' +
+    '<div class="tile" id="lg" style="margin-top:12px"><h3>접근 기록</h3>' + tbl(['시각', '열람자', '대상', '항목', '사유'], [['11.23 14:02', '창업육성팀 담당', '하루공방', '연락처·이메일', '근황 통화']]) + '</div></div>',
+  draw: function (pc) {
+    V.screens(pc)(0, []);
+    var cur = V.cursor(pc), fo = V.focus(pc), ob = q(pc, '#ob'), er = q(pc, '#er'), v1 = q(pc, '#v1'), v2 = q(pc, '#v2'), pm = q(pc, '#pm'), tm = q(pc, '#tm'), lg = q(pc, '#lg'), lr = q(pc, '#lg .rw');
+    var md = V.modal(pc, '<h3 style="margin:0 0 6px;font-size:20px">열람 비밀번호</h3><div class="mut" style="font-size:14px;margin-bottom:12px">열람 비밀번호를 입력하면 10분 동안 원문 보기가 열립니다.<br>5번 틀리면 15분 동안 잠깁니다.</div><div class="field" id="dots" style="letter-spacing:.3em"></div><div style="text-align:right;margin-top:14px"><span class="btn" id="ag">열람 허가 받기</span></div>');
+    var dots = q(md.el, '#dots'), ag = q(md.el, '#ag');
+    return function (p) {
+      md.draw(p, 3.6, 7.6);
+      set(dots, 'html', '●'.repeat(Math.round(8 * V.clamp((p - 4.4) / 1.4))));
+      var open = p > 7.1 && p < 11.6;
+      cur(p, [[2.2, { x: 700, y: 400 }], [2.8, ob], [6.2, ag], [10.6, er]], [3.3, 7.0, 11.2]);
+      set(v1, 'html', open ? '010-0000-0000 <span class="mut" style="font-size:13px;font-family:SUIT">(가상)</span>' : '010-****-****');
+      set(v2, 'html', open ? 'haru@example.kr' : 'ha****@****.kr');
+      set(er, 'opacity', open ? 1 : 0); set(pm, 'opacity', open ? 1 : 0);
+      set(tm, 'html', '· 남은 시간 ' + (9 - Math.floor(Math.max(0, p - 7.1) / 4.5 * 1)) + ':' + ('0' + (59 - Math.floor((Math.max(0, p - 7.1) * 13) % 60))).slice(-2));
+      fo(p, [[.4, 2.6, q(pc, '#pv'), 6], [13.8, 17.4, lg, 6]]);
+      set(lr, 'background', 'rgba(245,167,51,' + (.12 * seg(p, 13.8, 14.4)) + ')');
+    };
+  } });
+
+V.add(243, 255, { label: '마무리', custom: V.outro(FLOW, '숫자로 찾고, 기록으로 이어 가는', '<b>지원 이후의 관계.</b>', '함께일하는재단 통합관리시스템') });
+
+window.MUSIC = 'music/admin.m4a';
+V.start();
+</script></body></html>
