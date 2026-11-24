@@ -183,7 +183,7 @@
     });
     fit(); addEventListener('resize', fit);
     var ui = el('div', null, null, document.body); ui.id = 'ui';
-    ui.innerHTML = '<button id="pp">재생</button><select id="ch"></select><input id="sk" type="range" min="0" step="0.01"><span id="tc"></span>';
+    ui.innerHTML = '<button id="pp">재생</button><select id="ch"></select><input id="sk" type="range" min="0" step="0.01"><span id="tc"></span>' + (window.TRACKS ? '<select id="vo">' + window.TRACKS.map(function (k) { return '<option value="' + k[1] + '">' + k[0] + '</option>'; }).join('') + '</select>' : '');
     var pp = q(ui, '#pp'), sk = q(ui, '#sk'), tc = q(ui, '#tc'), ch = q(ui, '#ch');
     sk.max = DURATION;
     function mm(x) { x = Math.max(0, x); return Math.floor(x / 60) + ':' + ('0' + Math.floor(x % 60)).slice(-2); }
@@ -191,7 +191,7 @@
     var t = 0, playing = false, last = 0, au = window.MUSIC ? new Audio(window.MUSIC) : null;
     function seek(x) { t = Math.max(0, Math.min(DURATION, x)); if (au) au.currentTime = t; }
     function toggle() { playing = !playing; pp.textContent = playing ? '정지' : '재생'; last = performance.now(); if (t >= DURATION - .05) seek(0); if (au) { if (playing) { au.currentTime = t; au.play(); } else au.pause(); } }
-    pp.onclick = toggle; sk.oninput = function () { seek(+sk.value); }; ch.onchange = function () { seek(+ch.value); ch.blur(); };
+    pp.onclick = toggle; var vo = q(ui, '#vo'); if (vo && au) vo.onchange = function () { au.pause(); au.src = vo.value; au.currentTime = t; if (playing) au.play(); vo.blur(); }; sk.oninput = function () { seek(+sk.value); }; ch.onchange = function () { seek(+ch.value); ch.blur(); };
     addEventListener('keydown', function (e) {
       if (e.code === 'Space') { e.preventDefault(); toggle(); }
       if (e.code === 'ArrowRight') seek(t + 5);
