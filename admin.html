@@ -313,7 +313,7 @@ V.chapter(209, 225, { kind: 'admin', nav: '사업관리', cat: '사후관리 · 
 /* 8. 개인정보 */
 V.chapter(225, 243, { kind: 'admin', nav: '사후관리', cat: '개인정보', no: '13 · 개인정보 보호', title: '원문은 필요할 때만', path: '사후관리 > 참여자 데이터 > 참여자 정보',
   core: '원문과 서술은 권한 있는 사람만, 10분만, 기록을 남기고 봅니다.',
-  steps: [[.2, '가린 값으로 확인', '연락처·이메일은 평소 가린 값으로 보입니다'], [3, '원문 보기 → 비밀번호', '「원문 보기」를 누르고 본인 열람 비밀번호를 입력합니다'], [7, '10분 열람 허가', '「열람 허가 받기」를 누르면 10분 동안만 원문이 보입니다'], [11, '화면에서 지우기', '다 봤으면 「화면에서 지우기」로 바로 닫습니다'], [13.6, '접근 기록에 남음', '누가 언제 무엇을 봤는지 시스템 관리 > 접근 기록에 남습니다']],
+  steps: [[.2, '마스킹으로 확인', '연락처·이메일은 평소 마스킹으로 보입니다'], [3, '원문 보기 → 비밀번호', '「원문 보기」를 누르고 본인 열람 비밀번호를 입력합니다'], [7, '10분 열람 허가', '「열람 허가 받기」를 누르면 10분 동안만 원문이 보입니다'], [11, '화면에서 지우기', '다 봤으면 「화면에서 지우기」로 바로 닫습니다'], [13.6, '접근 기록에 남음', '누가 언제 무엇을 봤는지 시스템 관리 > 접근 기록에 남습니다']],
   html: '<div class="scr"><div class="crumb">사후관리 > 참여자 데이터 > 참여자 정보</div><div class="h1">하루공방 <span class="badge">대표자 정보</span></div>' +
     '<div class="tile" id="pv" style="font-size:18px;display:grid;grid-template-columns:110px 1fr auto;gap:12px 16px;align-items:center"><span class="mut">연락처</span><span id="v1" style="font-family:monospace;font-size:21px">010-****-****</span><span id="ob" class="btn g">원문 보기</span><span class="mut">이메일</span><span id="v2" style="font-family:monospace;font-size:21px">ha****@****.kr</span><span id="er" class="btn g" style="opacity:0">화면에서 지우기</span></div>' +
     '<div id="pm" class="tile" style="margin-top:12px;font-size:17px;font-weight:700;color:#F5A733;opacity:0">열람이 허가되었습니다 (14:12까지) <span id="tm" class="mut" style="font-weight:600"></span></div>' +
@@ -339,6 +339,6 @@ V.chapter(225, 243, { kind: 'admin', nav: '사후관리', cat: '개인정보', n
 
 V.add(243, 255, { label: '마무리', custom: V.outro(FLOW, '숫자로 찾고, 기록으로 이어 가는', '<b>지원 이후의 관계.</b>', '함께일하는재단 통합관리시스템') });
 
-window.MUSIC = 'narration/admin_ko.m4a?v=1'; window.TRACKS = [['기본 내레이션 (차분한 한국어 목소리)', 'narration/admin_ko.m4a?v=1'], ['애니메이션 내레이션 (밝은 한국어 목소리)', 'narration/admin_ani_ko.m4a?v=1'], ['이전 기본 내레이션', 'narration/admin.m4a?v=2'], ['이전 애니메이션 내레이션', 'narration/admin_ani.m4a?v=1']];
+window.MUSIC = 'narration/admin_step.m4a?v=1'; window.TRACKS = [['기본 내레이션 (차분한 목소리)', 'narration/admin_step.m4a?v=1'], ['애니메이션 내레이션 (밝은 목소리)', 'narration/admin_step_ani.m4a?v=1'], ['이전 기본 내레이션', 'narration/admin_ko.m4a?v=1'], ['이전 애니메이션 내레이션', 'narration/admin_ani_ko.m4a?v=1']];
 V.start();
 </script></body></html>
