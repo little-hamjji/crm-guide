@@ -111,3 +111,5 @@ table.t{width:100%;border-collapse:collapse;font-size:17px}
 .chn .chip.done{color:#b3a296}
 .chn .chip.on{color:#1d1206;background:#F5A733;border-color:#F5A733}
 .chn .chip.on em{color:#1d1206}
+@media (max-width:700px){#ui{gap:6px;padding:6px 8px;font-size:12px}#ui button{padding:4px 8px}#ui select{font-size:11px;padding:2px}#ui #ch{max-width:38%}#ui #vo{max-width:30%}#ui input{min-width:40px}}
+@media (max-width:500px){#ui #vo{display:none}}
